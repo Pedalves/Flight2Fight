@@ -1,9 +1,14 @@
 -- Renan da Fonte Simas dos Santos - 1412122
 -- Pedro Ferreira - 1320981
 
+local mqtt = require("ext/mqtt_library")
+
 local init = false
 local move_player1 = {left = "a", right = "d"}
 local move_player2 = {left = "left", right = "right"}
+
+local controle_right = false
+local controle_left = false
 
 -----------------------------------------------------------------------
 
@@ -23,9 +28,9 @@ function newPilot()
 			dir = 0 --guarda direção do movimento
 			
 			--Checa tecla pressionada
-			if love.keyboard.isDown(move_player1.right) then
+			if love.keyboard.isDown(move_player1.right) or controle_right then
 				dir = 1
-			elseif love.keyboard.isDown(move_player1.left) then
+			elseif love.keyboard.isDown(move_player1.left) or controle_left then
 				dir = -1
 			end
       
@@ -114,9 +119,9 @@ function newShooter(pilot)
 			dir = 0 --guarda direção do movimento
 			
 			--Checa tecla pressionada
-			if love.keyboard.isDown(move_player2.right) then
+			if love.keyboard.isDown(move_player2.right) or controle_right then
 				dir = 1
-			elseif love.keyboard.isDown(move_player2.left) then
+			elseif love.keyboard.isDown(move_player2.left) or controle_left then
 				dir = -1
 			end
       
@@ -181,6 +186,10 @@ end
 function love.load()
   love.window.setTitle("Flight2Fight")
   
+  mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
+  mqtt_client:connect("cliente love 1")
+  mqtt_client:subscribe({"apertou-tecla"})
+  
 	gameover = nil
 	gravity = 500
   gameovertextfont = love.graphics.newFont("resources/PressStart2P-Regular.ttf")
@@ -191,6 +200,7 @@ function love.load()
   
   player1 = newPilot()
   player2 = newShooter(player1)
+  
 end
 
 -----------------------------------------------------------------------
@@ -202,6 +212,8 @@ end
 -----------------------------------------------------------------------
 
 function love.update(dt)
+    mqtt_client:handler()
+  
   if (init and gameover == nil) then
     player1:update(dt)
     player2:update(dt)
@@ -228,4 +240,17 @@ function wait(segundos, meublip)
     cur = os.clock()
     meublip.sleep = cur+segundos
     coroutine.yield()
+end
+
+-----------------------------------------------------------------------
+
+function mqttcb(topic, message)
+  print("Received from topic: " .. topic .. " - message:" .. message)
+  if message == 'l' then
+    controle_left = not controle_left
+    controle_right = false
+  elseif message == 'r' then
+    controle_right = not controle_right
+    controle_left = false
+  end
 end
