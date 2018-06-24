@@ -178,6 +178,79 @@ end
 
 -----------------------------------------------------------------------
 
+function newEnemy(init_y, init_health)
+  print(init_health);
+  local y = init_y
+  local speed = math.random(1,3)
+  local x = math.random(1,love.graphics.getWidth() - 100)
+  local dir = 0;
+  
+  local img = love.graphics.newImage("resources/enemy.png")
+  return {
+	width = 100,
+  health = init_health,
+	height = 10,
+    update = coroutine.wrap (function (self)
+      if health == nil then
+        health = init_health;
+      end
+      
+      while 1 do
+        dir = math.random(-1,1);
+        
+        if dir >= 0 then
+          dir = 1;
+        else
+          dir = -1;
+        end
+        
+        local _, height = love.graphics.getDimensions( )
+        x = x+(speed*dir/20)
+        if health <= 0 then
+          y = init_y
+          x = math.random(1,love.graphics.getWidth() - 100)
+          health = init_health;
+          speed = math.random(1,3);
+        end
+        
+        if x <= 0 then
+          x = 0;
+        else if x >= love.graphics.getWidth() - 100 then
+          x = love.graphics.getWidth() - 100;
+        end
+        wait(1/1000, self);
+      end
+    end
+    end
+    ),
+    
+    draw = function(self)
+      major, minor, revision, codename = love.getVersion()
+      if minor == 9 then
+        love.graphics.setColor(0,0,0)
+        love.graphics.rectangle("fill", x, y, self.width, self.height)
+        love.graphics.setColor(255,255,255)
+      else
+        love.graphics.draw(img, x , y - 2*self.height, 0, 1/15, 1/10)
+      end
+    end,
+    
+    sleep = 0,
+    
+    isActive = function(self)
+      if(os.clock() >= self.sleep) then
+        return true
+      end
+      return false
+    end,
+	getPosition = function()
+		return x, y
+	end
+  }
+end
+
+-----------------------------------------------------------------------
+
 function love.load()
   love.window.setTitle("Flight2Fight")
   
@@ -188,6 +261,11 @@ function love.load()
   background = love.graphics.newImage("resources/background.jpg")
 	
 	math.randomseed(os.time())
+  listEnemies = {}
+  
+  for i = 1, 5 do
+		listEnemies[i] = newEnemy(i * 100, 3)
+	end
   
   player1 = newPilot()
   player2 = newShooter(player1)
@@ -203,8 +281,16 @@ end
 
 function love.update(dt)
   if (init and gameover == nil) then
+    --Atualiza players
     player1:update(dt)
     player2:update(dt)
+    
+    --Atualiza inimigos
+    for i = 1,#listEnemies do
+      if(listEnemies[i]:isActive()) then
+        listEnemies[i]:update()      
+      end
+    end
   end
 end
 
@@ -216,9 +302,14 @@ function love.draw()
 	if gameover == nil then
 		love.graphics.draw(background, 0, 0, 0, sx, sy)
 
+    --Desenha players
 		player1:draw()
     player2:draw()
     
+    --Desenha inimigos
+    for i = 1,#listEnemies do
+			listEnemies[i]:draw()
+		end
 	end
 end
 
