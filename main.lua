@@ -181,7 +181,7 @@ end
 function newEnemy(init_y, init_health)
   print(init_health);
   local y = init_y
-  local speed = math.random(1,3)
+  local speed = math.random(10,30)
   local x = math.random(1,love.graphics.getWidth() - 100)
   local dir = 0;
   
@@ -195,28 +195,31 @@ function newEnemy(init_y, init_health)
         health = init_health;
       end
       
-      while 1 do
-        dir = math.random(-1,1);
-        
-        if dir >= 0 then
-          dir = 1;
-        else
-          dir = -1;
-        end
-        
+      --Define direcao
+      dir = math.random(-1,1);
+      
+      if dir >= 0 then
+        dir = 1;
+      else
+        dir = -1;
+      end
+      
+      while 1 do        
         local _, height = love.graphics.getDimensions( )
         x = x+(speed*dir/20)
         if health <= 0 then
           y = init_y
           x = math.random(1,love.graphics.getWidth() - 100)
           health = init_health;
-          speed = math.random(1,3);
+          speed = math.random(10,30);
         end
         
         if x <= 0 then
           x = 0;
+          dir = dir * -1;
         else if x >= love.graphics.getWidth() - 100 then
           x = love.graphics.getWidth() - 100;
+          dir = dir * -1;
         end
         wait(1/1000, self);
       end
