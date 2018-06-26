@@ -69,13 +69,13 @@ end
 
 -----------------------------------------------------------------------
 
-function newBullet(angle, posX, posY, pilot) 
+function newBullet(angle, posX, posY, origin, colorR, colorG, colorB) 
   return {
     speedY = math.sin(angle);
     speedX = math.cos(angle);
     height = 10;
     width = 10;
-    x = posX + pilot.width/2;
+    x = posX + origin.width/2;
     y = posY;
     
     update = function(self)
@@ -84,7 +84,7 @@ function newBullet(angle, posX, posY, pilot)
     end,
     
     draw = function(self)
-      love.graphics.setColor(1,0,0)
+      love.graphics.setColor(colorR,colorG,colorB)
       love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
       love.graphics.setColor(255,255,255)
     end
@@ -110,7 +110,7 @@ function newShooter(pilot)
   spawnBullet = coroutine.wrap (function (self)
       local i = 0;
       while 1 do
-        bullets[i] = newBullet(angle, x, y, pilot)
+        bullets[i] = newBullet(angle, x, y, pilot, 1, 0, 0)
         i = i + 1;
         wait(1/10, self)
        
@@ -187,17 +187,27 @@ end
 -----------------------------------------------------------------------
 
 function newEnemy(init_y, init_health)
-  print(init_health);
   local y = init_y
   local speed = math.random(10,30)
   local x = math.random(1,love.graphics.getWidth() - 100)
   local dir = 0;
+  local bullets = {};
   
   local img = love.graphics.newImage("resources/enemy.png")
   return {
 	width = 100,
   health = init_health,
 	height = 10,
+    spawnBullet = coroutine.wrap (function (self)
+      local i = 0;
+      while 1 do
+        bullets[i] = newBullet(3*math.pi/2, x, y, self, 0, 1, 0)
+        i = i + 1;
+        wait(1/10, self)
+       
+      end
+    end),
+  
     update = coroutine.wrap (function (self)
       if health == nil then
         health = init_health;
@@ -222,6 +232,16 @@ function newEnemy(init_y, init_health)
           speed = math.random(10,30);
         end
         
+        --atirar
+        if(self:isActive()) then
+          self:spawnBullet();
+        end 
+      
+        for i = 1, #bullets do
+          bullets[i]:update();
+        end
+        
+        --checando limites
         if x <= 0 then
           x = 0;
           dir = dir * -1;
