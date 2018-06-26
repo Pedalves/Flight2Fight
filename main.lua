@@ -92,7 +92,7 @@ function newBullet(angle, posX, posY, origin, colorR, colorG, colorB, speedBase,
       if(target == "player") then
         playerX, playerY = player1.getPosition();
         if ((playerX <= self.x and (playerX + player1.width) >= self.x) and (playerY <= self.y and (playerY + player1.height) >= self.y)) then
-          print("ACERTOU PLAYER 1");
+          gameover = true;
           return true
         end
         
@@ -344,6 +344,12 @@ end
 
 function love.keypressed(key)
 	init = true
+  
+  if gameover ~= nil then
+    if key == 'space' or key == ' ' then
+        love.load()
+    end
+  end
 end
 
 -----------------------------------------------------------------------
@@ -381,6 +387,14 @@ function love.draw()
     for i = 1,#listEnemies do
 			listEnemies[i]:draw()
 		end
+    
+  else
+    love.graphics.setFont(gameovertextfont)
+    love.graphics.draw(background, 0, 0, 0, sx, sy)
+    love.graphics.setColor(0,0,0)
+		love.graphics.print("GAME OVER", love.graphics.getWidth()/6, love.graphics.getHeight()/4, 0, 5, 5)
+    love.graphics.print("Press SPACE to start a new game", love.graphics.getWidth()/4, love.graphics.getHeight()/1.2, 0, 1, 1)
+    love.graphics.setColor(255,255,255)
 	end
 end
 
