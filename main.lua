@@ -318,8 +318,10 @@ end
 function love.load()
   love.window.setTitle("Flight2Fight")
   
+  love.window.setMode( 1000, 700)
+  
   mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
-  mqtt_client:connect("cliente love 1")
+  mqtt_client:connect("GM")
   mqtt_client:subscribe({"apertou-tecla"})
   
 	gameover = nil
