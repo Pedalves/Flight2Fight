@@ -69,18 +69,42 @@ end
 
 -----------------------------------------------------------------------
 
-function newBullet(angle, posX, posY, origin, colorR, colorG, colorB) 
+function newBullet(angle, posX, posY, origin, colorR, colorG, colorB, speedBase, target) 
   return {
-    speedY = math.sin(angle);
-    speedX = math.cos(angle);
+    speedY = speedBase*math.sin(angle);
+    speedX = speedBase*math.cos(angle);
     height = 10;
     width = 10;
     x = posX + origin.width/2;
     y = posY;
     
-    update = function(self)
-      self.y = self.y + self.speedY;
-      self.x = self.x + self.speedX;
+    update = function(self, updateX)
+      if(self:checkCollision(target)) then
+        self.y = 100000;
+      end
+      self.y = self.y + self.speedY
+      if updateX then
+        self.x = self.x + self.speedX
+      end
+    end,
+    
+    checkCollision = function(self, target)
+      if(target == "player") then
+        playerX, playerY = player1.getPosition();
+        if ((playerX <= self.x and (playerX + player1.width) >= self.x) and (playerY <= self.y and (playerY + player1.height) >= self.y)) then
+          print("ACERTOU PLAYER 1");
+          return true
+        end
+        
+      elseif (target == "enemy") then
+        for i = 1,#listEnemies do
+          enemyX, enemyY = listEnemies[i].getPosition();
+          if ((enemyX <= self.x and (enemyX + listEnemies[i].width) >= self.x) and (enemyY <= self.y and (enemyY + listEnemies[i].height) >= self.y)) then
+            listEnemies[i]:Damage(1);
+            return true
+          end
+        end
+      end
     end,
     
     draw = function(self)
@@ -110,7 +134,7 @@ function newShooter(pilot)
   spawnBullet = coroutine.wrap (function (self)
       local i = 0;
       while 1 do
-        bullets[i] = newBullet(angle, x, y, pilot, 1, 0, 0)
+        bullets[i] = newBullet(angle, x, y, pilot, 1, 0, 0, 1, "enemy")
         i = i + 1;
         wait(1/10, self)
        
@@ -140,7 +164,7 @@ function newShooter(pilot)
       end
       
       for i = 1, #bullets do
-        bullets[i]:update();
+        bullets[i]:update(true);
       end
       
 		end,
@@ -190,68 +214,64 @@ function newEnemy(init_y, init_health)
   local y = init_y
   local speed = math.random(10,30)
   local x = math.random(1,love.graphics.getWidth() - 100)
-  local dir = 0;
-  local bullets = {};
+  local dir = 0
+  local bullets = {}
+  
+  local health = init_health
   
   local img = love.graphics.newImage("resources/enemy.png")
   return {
 	width = 100,
-  health = init_health,
 	height = 10,
     spawnBullet = coroutine.wrap (function (self)
       local i = 0;
       while 1 do
-        bullets[i] = newBullet(3*math.pi/2, x, y, self, 0, 1, 0)
+        bullets[i] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 3, "player")
         i = i + 1;
         wait(1/10, self)
-       
       end
     end),
   
     update = coroutine.wrap (function (self)
-      if health == nil then
-        health = init_health;
-      end
-      
-      --Define direcao
-      dir = math.random(-1,1);
-      
-      if dir >= 0 then
-        dir = 1;
-      else
-        dir = -1;
-      end
-      
-      while 1 do        
-        local _, height = love.graphics.getDimensions( )
-        x = x+(speed*dir/20)
-        if health <= 0 then
-          y = init_y
-          x = math.random(1,love.graphics.getWidth() - 100)
-          health = init_health;
-          speed = math.random(10,30);
+        --Define direcao
+        dir = math.random(-1,1);
+        
+        if dir >= 0 then
+          dir = 1;
+        else
+          dir = -1;
         end
         
-        --atirar
-        if(self:isActive()) then
-          self:spawnBullet();
-        end 
-      
-        for i = 1, #bullets do
-          bullets[i]:update();
+        while 1 do  
+            local _, height = love.graphics.getDimensions( )
+            x = x+(speed*dir/20)
+            if health < 0 then
+              y = init_y
+              x = math.random(1,love.graphics.getWidth() - 100)
+              health = init_health;
+              speed = math.random(10,30);
+            end
+            
+            --atirar
+            if(math.random(1,250) == 1) then
+              self:spawnBullet();
+            end 
+            
+            for i = 1, #bullets do
+              bullets[i]:update(false);
+            end
+            
+            --checando limites
+            if x <= 0 then
+              x = 0;
+              dir = dir * -1;
+            else if x >= love.graphics.getWidth() - 100 then
+              x = love.graphics.getWidth() - 100;
+              dir = dir * -1;
+            end
+          wait(1/1000, self);
         end
-        
-        --checando limites
-        if x <= 0 then
-          x = 0;
-          dir = dir * -1;
-        else if x >= love.graphics.getWidth() - 100 then
-          x = love.graphics.getWidth() - 100;
-          dir = dir * -1;
-        end
-        wait(1/1000, self);
       end
-    end
     end
     ),
     
@@ -262,7 +282,11 @@ function newEnemy(init_y, init_health)
         love.graphics.rectangle("fill", x, y, self.width, self.height)
         love.graphics.setColor(255,255,255)
       else
-        love.graphics.draw(img, x , y - 2*self.height, 0, 1/15, 1/10)
+        love.graphics.draw(img, x , y - 2*self.height, 0, 1/5, 1/8)
+      end
+      
+      for i = 1, #bullets do
+        bullets[i]:draw();
       end
     end,
     
@@ -274,9 +298,18 @@ function newEnemy(init_y, init_health)
       end
       return false
     end,
-	getPosition = function()
-		return x, y
-	end
+    
+    getPosition = function()
+      return x, y
+    end,
+    
+    Damage = function(self, amount)
+      health = health - 1;
+      if(health <= 0) then
+        print("RIP Enemy");
+        y = 1000
+      end
+    end
   }
 end
 

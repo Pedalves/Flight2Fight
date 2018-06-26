@@ -1,4 +1,4 @@
-local meuid = "preenchercomsuamatricula"
+local meuid = "player1"
 local m = mqtt.Client("clientid " .. meuid, 120)
 
 function publica(c)
