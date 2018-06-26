@@ -2,12 +2,12 @@ local meuid = "preenchercomsuamatricula"
 local m = mqtt.Client("clientid " .. meuid, 120)
 
 function publica(c)
-  c:publish("apertou-tecla", "l",0,0, 
+  c:publish("apertou-tecla", "l1",0,0, 
             function(client) print("mandou!") end)
 end
 
 function publica2(c)
-  c:publish("apertou-tecla", "r",0,0, 
+  c:publish("apertou-tecla", "r1",0,0, 
             function(client) print("mandou!") end)
 end
 

@@ -7,8 +7,11 @@ local init = false
 local move_player1 = {left = "a", right = "d"}
 local move_player2 = {left = "left", right = "right"}
 
-local controle_right = false
-local controle_left = false
+local controle_right1 = false
+local controle_left1 = false
+
+local controle_right2 = false
+local controle_left2 = false
 
 -----------------------------------------------------------------------
 
@@ -28,9 +31,9 @@ function newPilot()
 			dir = 0 --guarda direção do movimento
 			
 			--Checa tecla pressionada
-			if love.keyboard.isDown(move_player1.right) or controle_right then
+			if love.keyboard.isDown(move_player1.right) or controle_right1 then
 				dir = 1
-			elseif love.keyboard.isDown(move_player1.left) or controle_left then
+			elseif love.keyboard.isDown(move_player1.left) or controle_left1 then
 				dir = -1
 			end
       
@@ -119,9 +122,9 @@ function newShooter(pilot)
 			dir = 0 --guarda direção do movimento
 			
 			--Checa tecla pressionada
-			if love.keyboard.isDown(move_player2.right) or controle_right then
+			if love.keyboard.isDown(move_player2.right) or controle_right2 then
 				dir = 1
-			elseif love.keyboard.isDown(move_player2.left) or controle_left then
+			elseif love.keyboard.isDown(move_player2.left) or controle_left2 then
 				dir = -1
 			end
       
@@ -276,7 +279,7 @@ function love.load()
   listEnemies = {}
   
   for i = 1, 5 do
-		listEnemies[i] = newEnemy(i * 100, 3)
+		listEnemies[i] = newEnemy(i * 80, 3)
 	end
   
   player1 = newPilot()
@@ -340,11 +343,19 @@ end
 
 function mqttcb(topic, message)
   print("Received from topic: " .. topic .. " - message:" .. message)
-  if message == 'l' then
-    controle_left = not controle_left
-    controle_right = false
-  elseif message == 'r' then
-    controle_right = not controle_right
-    controle_left = false
+  if message == 'l1' then
+    controle_left1 = not controle_left1
+    controle_right1 = false
+  elseif message == 'r1' then
+    controle_right1 = not controle_right1
+    controle_left1 = false
+  end
+  
+  if message == 'l2' then
+    controle_left2 = not controle_left2
+    controle_right2 = false
+  elseif message == 'r2' then
+    controle_right2 = not controle_right2
+    controle_left2 = false
   end
 end
