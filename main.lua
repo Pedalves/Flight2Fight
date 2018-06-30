@@ -122,7 +122,7 @@ function newShooter(pilot)
   local x, y = pilot.getPosition()
   
   local angle = -math.pi/2;
-  local speed = 0.001;
+  local speed = 0.5;
   
   local bullets = {};
   local timeLeftToTrySpawnBullet = 0.2;
