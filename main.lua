@@ -125,6 +125,7 @@ function newShooter(pilot)
   local speed = 0.001;
   
   local bullets = {};
+  local timeLeftToTrySpawnBullet = 0.2;
   
   --local img = love.graphics.newImage("resources/plataform.png")
   return {
@@ -134,7 +135,7 @@ function newShooter(pilot)
   spawnBullet = coroutine.wrap (function (self)
       local i = 0;
       while 1 do
-        bullets[i] = newBullet(angle, x, y, pilot, 1, 0, 0, 1, "enemy")
+        bullets[i] = newBullet(angle, x, y, pilot, 1, 0, 0, 200, "enemy")
         i = i + 1;
         wait(1/10, self)
        
@@ -159,7 +160,9 @@ function newShooter(pilot)
       
       x, y = pilot.getPosition()
       
-      if(self:isActive()) then
+      timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
+      if(self:isActive() and timeLeftToTrySpawnBullet <= 0) then
+        timeLeftToTrySpawnBullet = 0.2;
         self:spawnBullet();
       end
       
@@ -226,7 +229,7 @@ function newEnemy(init_y, init_health)
     spawnBullet = coroutine.wrap (function (self)
       local i = 0;
       while 1 do
-        bullets[i] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 3, "player")
+        bullets[i] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 600, "player")
         i = i + 1;
         wait(1/10, self)
       end
@@ -235,6 +238,7 @@ function newEnemy(init_y, init_health)
     update = coroutine.wrap (function (self, dt)
         --Define direcao
         dir = math.random(-1,1);
+        timeLeftToTrySpawnBullet = 0.2;
         
         if dir >= 0 then
           dir = 1;
@@ -253,9 +257,13 @@ function newEnemy(init_y, init_health)
             end
             
             --atirar
-            if(math.random(1,250) == 1) then
-              self:spawnBullet();
-            end 
+            timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
+            if(timeLeftToTrySpawnBullet <= 0) then
+              timeLeftToTrySpawnBullet = 0.2;
+              if(math.random(1,10) == 1) then
+                self:spawnBullet();
+              end 
+            end
             
             for i = 1, #bullets do
               bullets[i]:update(false, dt);
@@ -321,7 +329,7 @@ function love.load()
   love.window.setMode( 1000, 700)
   
   mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
-  mqtt_client:connect("GM")
+  mqtt_client:connect("GM" .. os.time())
   mqtt_client:subscribe({"apertou-tecla"})
   
 	gameover = nil
@@ -330,7 +338,7 @@ function love.load()
   
   background = love.graphics.newImage("resources/background.jpg")
 	
-	math.randomseed(os.time())
+	math.randomseed(1)
   listEnemies = {}
   
   for i = 1, 5 do
@@ -349,7 +357,7 @@ function love.keypressed(key)
   
   if gameover ~= nil then
     if key == 'space' or key == ' ' then
-        love.load()
+        love.event.quit("restart")
     end
   end
 end
@@ -358,8 +366,6 @@ end
 
 function love.update(dt)
     mqtt_client:handler()
-    print(love.timer.getAverageDelta())
-    print(love.timer.getFPS())
   
   if (init and gameover == nil) then
     --Atualiza players
