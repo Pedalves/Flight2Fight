@@ -78,13 +78,13 @@ function newBullet(angle, posX, posY, origin, colorR, colorG, colorB, speedBase,
     x = posX + origin.width/2;
     y = posY;
     
-    update = function(self, updateX)
+    update = function(self, updateX, dt)
       if(self:checkCollision(target)) then
         self.y = 100000;
       end
-      self.y = self.y + self.speedY
+      self.y = self.y + self.speedY*dt
       if updateX then
-        self.x = self.x + self.speedX
+        self.x = self.x + self.speedX*dt
       end
     end,
     
@@ -153,7 +153,7 @@ function newShooter(pilot)
 			end
       
 			--Executa movimento
-			angle = angle + dir*speed*math.pi
+			angle = angle + dir*speed*math.pi*dt
       
       self:checkPos()
       
@@ -164,7 +164,7 @@ function newShooter(pilot)
       end
       
       for i = 1, #bullets do
-        bullets[i]:update(true);
+        bullets[i]:update(true, dt);
       end
       
 		end,
@@ -232,7 +232,7 @@ function newEnemy(init_y, init_health)
       end
     end),
   
-    update = coroutine.wrap (function (self)
+    update = coroutine.wrap (function (self, dt)
         --Define direcao
         dir = math.random(-1,1);
         
@@ -249,7 +249,7 @@ function newEnemy(init_y, init_health)
               y = init_y
               x = math.random(1,love.graphics.getWidth() - 100)
               health = init_health;
-              speed = math.random(10,30);
+              speed = math.random(10,30)*dt;
             end
             
             --atirar
@@ -258,7 +258,7 @@ function newEnemy(init_y, init_health)
             end 
             
             for i = 1, #bullets do
-              bullets[i]:update(false);
+              bullets[i]:update(false, dt);
             end
             
             --checando limites
@@ -358,6 +358,8 @@ end
 
 function love.update(dt)
     mqtt_client:handler()
+    print(love.timer.getAverageDelta())
+    print(love.timer.getFPS())
   
   if (init and gameover == nil) then
     --Atualiza players
@@ -367,7 +369,7 @@ function love.update(dt)
     --Atualiza inimigos
     for i = 1,#listEnemies do
       if(listEnemies[i]:isActive()) then
-        listEnemies[i]:update()      
+        listEnemies[i]:update(dt)      
       end
     end
   end
