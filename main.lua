@@ -13,6 +13,8 @@ local controle_left1 = false
 local controle_right2 = false
 local controle_left2 = false
 
+local players = 0
+
 -----------------------------------------------------------------------
 
 function newPilot()
@@ -353,8 +355,6 @@ end
 -----------------------------------------------------------------------
 
 function love.keypressed(key)
-	init = true
-  
   if gameover ~= nil then
     if key == 'space' or key == ' ' then
         love.event.quit("restart")
@@ -365,7 +365,11 @@ end
 -----------------------------------------------------------------------
 
 function love.update(dt)
-    mqtt_client:handler()
+  mqtt_client:handler()
+  
+  if players == 2 then
+    init = true
+  end
   
   if (init and gameover == nil) then
     --Atualiza players
@@ -388,7 +392,13 @@ function love.draw()
 	local sy = love.graphics.getHeight() / background:getHeight()
 	if gameover == nil then
 		love.graphics.draw(background, 0, 0, 0, sx, sy)
-
+    
+    if init == false then
+      love.graphics.setColor(0,0,0)
+      love.graphics.print("Waiting for " .. 2 - players .. " players", love.graphics.getWidth()/6, love.graphics.getHeight()/4, 0, 5, 5)
+      love.graphics.setColor(255,255,255)
+    end
+    
     --Desenha players
 		player1:draw()
     player2:draw()
@@ -420,6 +430,10 @@ end
 
 function mqttcb(topic, message)
   print("Received from topic: " .. topic .. " - message:" .. message)
+  if message == 'newPlayer' then
+    players = players + 1
+  end
+  
   if message == 'l1' then
     controle_left1 = not controle_left1
     controle_right1 = false

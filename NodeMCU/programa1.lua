@@ -1,7 +1,7 @@
 wificonf = {
   -- verificar ssid e senha
-  ssid = "reativoss",
-  pwd = "reativos2",
+  ssid = "",
+  pwd = "",
   save = false
 }
 

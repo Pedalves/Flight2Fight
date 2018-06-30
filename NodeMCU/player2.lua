@@ -11,6 +11,11 @@ function publica2(c)
             function(client) print("mandou!") end)
 end
 
+function newPlayer(c)
+  c:publish("apertou-tecla", "newPlayer",0,0, 
+            function(client) print("mandou!") end)
+end
+
 function novaInscricao (c)
   local msgsrec = 0
   function novamsg (c, t, m)
@@ -21,8 +26,8 @@ function novaInscricao (c)
 end
 
 function conectado (client)
-  publica(client)
   client:subscribe("puc-rio-inf1805", 0, novaInscricao)
+  publica(newPlayer)
 end 
 
 m:connect("test.mosquitto.org", 1883, 0, 
