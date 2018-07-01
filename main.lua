@@ -13,7 +13,7 @@ local controle_left1 = false
 local controle_right2 = false
 local controle_left2 = false
 
-local players = 0
+local players = 2
 
 -----------------------------------------------------------------------
 
@@ -127,7 +127,7 @@ function newShooter(pilot)
   local speed = 0.5;
   
   local bullets = {};
-  local timeLeftToTrySpawnBullet = 0.2;
+  local timeLeftToTrySpawnBullet = 0.5;
   
   --local img = love.graphics.newImage("resources/plataform.png")
   return {
@@ -164,7 +164,7 @@ function newShooter(pilot)
       
       timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
       if(self:isActive() and timeLeftToTrySpawnBullet <= 0) then
-        timeLeftToTrySpawnBullet = 0.2;
+        timeLeftToTrySpawnBullet = 0.5;
         self:spawnBullet();
       end
       
@@ -217,7 +217,7 @@ end
 
 function newEnemy(init_y, init_health)
   local y = init_y
-  local speed = math.random(10,30)
+  local speed = math.random(20,20);
   local x = math.random(1,love.graphics.getWidth() - 100)
   local dir = 0
   local bullets = {}
@@ -240,7 +240,7 @@ function newEnemy(init_y, init_health)
     update = coroutine.wrap (function (self, dt)
         --Define direcao
         dir = math.random(-1,1);
-        timeLeftToTrySpawnBullet = 0.2;
+        timeLeftToTrySpawnBullet = 0.5;
         
         if dir >= 0 then
           dir = 1;
@@ -250,19 +250,19 @@ function newEnemy(init_y, init_health)
         
         while 1 do  
             local _, height = love.graphics.getDimensions( )
-            x = x+(speed*dir/20)
+            x = x+(speed*dt*dir*300)
             if health < 0 then
               y = init_y
               x = math.random(1,love.graphics.getWidth() - 100)
               health = init_health;
-              speed = math.random(10,30)*dt;
+              --speed = math.random(20,20);
             end
             
             --atirar
             timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
             if(timeLeftToTrySpawnBullet <= 0) then
-              timeLeftToTrySpawnBullet = 0.2;
-              if(math.random(1,10) == 1) then
+              timeLeftToTrySpawnBullet = 0.5;
+              if(true) then--math.random(1,2) == 1) then
                 self:spawnBullet();
               end 
             end
