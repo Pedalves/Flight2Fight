@@ -95,7 +95,7 @@ function newBullet(angle, posX, posY, origin, colorR, colorG, colorB, speedBase,
         playerX, playerY = player1.getPosition();
         if ((playerX <= self.x and (playerX + player1.width) >= self.x) and (playerY <= self.y and (playerY + player1.height) >= self.y)) then
           gameover = true;
-          mqtt_client:publish("dead", "sorry")
+          mqtt_client:publish("deadPlayer", "dead")
           return true
         end
         
@@ -305,7 +305,7 @@ function love.load()
   
   mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
   mqtt_client:connect("GM" .. os.time())
-  mqtt_client:subscribe({"apertou-tecla"})
+  mqtt_client:subscribe({"apertou-tecla","deadPlayer"})
   
 	gameover = nil
 	gravity = 500
@@ -402,7 +402,7 @@ end
 function mqttcb(topic, message)
   print("Received from topic: " .. topic .. " - message:" .. message)
   
-  if topic == 'dead' then
+  if message == 'dead' then
     gameover = true
   end
   
