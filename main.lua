@@ -219,28 +219,27 @@ function newEnemy(init_y, init_health)
   local y = init_y
   local speed = math.random(20,20);
   local x = math.random(1,love.graphics.getWidth() - 100)
-  local dir = 0
+  local dir = math.random(-1,1);
   local bullets = {}
-  
+  local timeLeftToTrySpawnBullet = 0.5;
   local health = init_health
   
   local img = love.graphics.newImage("resources/enemy.png")
   return {
 	width = 100,
 	height = 10,
-    spawnBullet = coroutine.wrap (function (self)
+  spawnBullet = coroutine.wrap (function (self)
       local i = 0;
       while 1 do
-        bullets[i] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 600, "player")
+        bullets[i] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 200, "player")
         i = i + 1;
         wait(1/10, self)
+       
       end
     end),
   
-    update = coroutine.wrap (function (self, dt)
+    update = function (self, dt)
         --Define direcao
-        dir = math.random(-1,1);
-        timeLeftToTrySpawnBullet = 0.5;
         
         if dir >= 0 then
           dir = 1;
@@ -248,43 +247,39 @@ function newEnemy(init_y, init_health)
           dir = -1;
         end
         
-        while 1 do  
-            local _, height = love.graphics.getDimensions( )
-            x = x+(speed*dt*dir*300)
-            if health < 0 then
-              y = init_y
-              x = math.random(1,love.graphics.getWidth() - 100)
-              health = init_health;
-              --speed = math.random(20,20);
-            end
-            
-            --atirar
-            timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
-            if(timeLeftToTrySpawnBullet <= 0) then
-              timeLeftToTrySpawnBullet = 0.5;
-              if(true) then--math.random(1,2) == 1) then
-                self:spawnBullet();
-              end 
-            end
-            
-            for i = 1, #bullets do
-              bullets[i]:update(false, dt);
-            end
-            
-            --checando limites
-            if x <= 0 then
-              x = 0;
-              dir = dir * -1;
-            else if x >= love.graphics.getWidth() - 100 then
-              x = love.graphics.getWidth() - 100;
-              dir = dir * -1;
-            end
-          wait(1/1000, self);
+        local _, height = love.graphics.getDimensions( )
+        x = x+(speed*dt*dir*10)
+        if health < 0 then
+          y = init_y
+          x = math.random(1,love.graphics.getWidth() - 100)
+          health = init_health;
+          --speed = math.random(20,20);
+        end
+        
+        --atirar
+        timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
+        if(timeLeftToTrySpawnBullet <= 0) then
+          timeLeftToTrySpawnBullet = 0.5;
+          if (math.random(1,4) == 1) then
+            self:spawnBullet();
+          end 
+        end
+        
+        for i = 1, #bullets do
+          bullets[i]:update(false, dt);
+        end
+        
+        --checando limites
+        if x <= 0 then
+          x = 0;
+          dir = dir * -1;
+        else if x >= love.graphics.getWidth() - 100 then
+          x = love.graphics.getWidth() - 100;
+          dir = dir * -1;
         end
       end
-    end
-    ),
-    
+    end,
+  
     draw = function(self)
       major, minor, revision, codename = love.getVersion()
       if minor == 9 then
@@ -316,7 +311,6 @@ function newEnemy(init_y, init_health)
     Damage = function(self, amount)
       health = health - 1;
       if(health <= 0) then
-        print("RIP Enemy");
         y = 1000
       end
     end
