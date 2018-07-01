@@ -27,7 +27,7 @@ end
 
 function conectado (client)
   client:subscribe("puc-rio-inf1805", 0, novaInscricao)
-  publica(newPlayer)
+  newPlayer(client)
 end 
 
 m:connect("test.mosquitto.org", 1883, 0, 
