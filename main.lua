@@ -286,9 +286,9 @@ function newEnemy(init_y, init_health, id)
       health = health - 1;
       if(health <= 0) then
         y = 1000
+        mqtt_client:publish("deadEnemy", enemyId)
+        health = 10
       end
-      
-      mqtt_client:publish("deadEnemy", enemyId)
     end
   }
 end
@@ -397,7 +397,7 @@ end
 -----------------------------------------------------------------------
 
 function mqttcb(topic, message)
-  print("Received from topic: " .. topic .. " - message:" .. message)
+  --print("Received from topic: " .. topic .. " - message:" .. message)
   
   if message == 'dead' then
     gameover = true
