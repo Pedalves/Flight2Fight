@@ -127,6 +127,7 @@ function newShooter(pilot)
   local speed = 0.5;
   
   local bullets = {};
+  local bulletPos = 0;
   local timeLeftToTrySpawnBullet = 0.5;
   
   --local img = love.graphics.newImage("resources/plataform.png")
@@ -134,15 +135,10 @@ function newShooter(pilot)
 	width = 50,
 	height = 10,
   
-  spawnBullet = coroutine.wrap (function (self)
-      local i = 0;
-      while 1 do
-        bullets[i] = newBullet(angle, x, y, pilot, 1, 0, 0, 200, "enemy")
-        i = i + 1;
-        wait(1/10, self)
-       
-      end
-    end),
+  spawnBullet = function (self)
+    bullets[bulletPos] = newBullet(angle, x, y, pilot, 1, 0, 0, 200, "enemy")
+    bulletPos = bulletPos + 1;
+  end,
     
   
   update = function(self, dt)
@@ -221,6 +217,7 @@ function newEnemy(init_y, init_health)
   local x = math.random(1,love.graphics.getWidth() - 100)
   local dir = math.random(-1,1);
   local bullets = {}
+  local bulletPos = 0
   local timeLeftToTrySpawnBullet = 0.5;
   local health = init_health
   
@@ -228,15 +225,11 @@ function newEnemy(init_y, init_health)
   return {
 	width = 100,
 	height = 10,
-  spawnBullet = coroutine.wrap (function (self)
-      local i = 0;
-      while 1 do
-        bullets[i] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 200, "player")
-        i = i + 1;
-        wait(1/10, self)
-       
-      end
-    end),
+  spawnBullet = function (self)
+    bullets[bulletPos] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 200, "player")
+    bulletPos = bulletPos + 1;
+    wait(1/1000, self)
+  end,
   
     update = function (self, dt)
         --Define direcao
@@ -260,7 +253,7 @@ function newEnemy(init_y, init_health)
         timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
         if(timeLeftToTrySpawnBullet <= 0) then
           timeLeftToTrySpawnBullet = 0.5;
-          if (math.random(1,4) == 1) then
+          if (math.random(1,6) == 1) then
             self:spawnBullet();
           end 
         end
