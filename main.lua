@@ -13,7 +13,7 @@ local controle_left1 = false
 local controle_right2 = false
 local controle_left2 = false
 
-local players = 2
+local players = 0
 
 -----------------------------------------------------------------------
 
@@ -218,7 +218,7 @@ function newEnemy(init_y, init_health)
   local dir = math.random(-1,1);
   local bullets = {}
   local bulletPos = 0
-  local timeLeftToTrySpawnBullet = 0.5;
+  local timeLeftToTrySpawnBullet = 3;
   local health = init_health
   
   local img = love.graphics.newImage("resources/enemy.png")
@@ -252,8 +252,8 @@ function newEnemy(init_y, init_health)
         --atirar
         timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
         if(timeLeftToTrySpawnBullet <= 0) then
-          timeLeftToTrySpawnBullet = 0.5;
-          if (math.random(1,6) == 1) then
+          timeLeftToTrySpawnBullet = 3;
+          if true then
             self:spawnBullet();
           end 
         end
