@@ -236,13 +236,6 @@ function newEnemy(init_y, init_health, id)
         
         local _, height = love.graphics.getDimensions( )
         x = x+(speed*dt*dir*10)
-        if health < 0 then
-          mqtt_client:publish("deadEnemy", enemyId)
-          y = init_y
-          x = love.graphics.getWidth() - 100
-          health = init_health;
-          --speed = math.random(20,20);
-        end
         
         --atirar
         timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
@@ -294,6 +287,8 @@ function newEnemy(init_y, init_health, id)
       if(health <= 0) then
         y = 1000
       end
+      
+      mqtt_client:publish("deadEnemy", enemyId)
     end
   }
 end
@@ -409,7 +404,7 @@ function mqttcb(topic, message)
   end
   
   if topic == 'deadEnemy' then
-    listEnemies[message]:damage()
+    listEnemies[tonumber(message)]:damage()
   end
   
   if message == 'newPlayer' then
