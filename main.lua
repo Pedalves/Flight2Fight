@@ -95,6 +95,7 @@ function newBullet(angle, posX, posY, origin, colorR, colorG, colorB, speedBase,
         playerX, playerY = player1.getPosition();
         if ((playerX <= self.x and (playerX + player1.width) >= self.x) and (playerY <= self.y and (playerY + player1.height) >= self.y)) then
           gameover = true;
+          mqtt_client:publish("dead", "sorry")
           return true
         end
         
@@ -400,6 +401,15 @@ end
 
 function mqttcb(topic, message)
   print("Received from topic: " .. topic .. " - message:" .. message)
+  
+  if topic == 'dead' then
+    gameover = true
+  end
+  
+  if topic == 'deadEnemy' then
+    print(message)
+  end
+  
   if message == 'newPlayer' then
     players = players + 1
   end
