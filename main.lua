@@ -103,7 +103,7 @@ function newBullet(angle, posX, posY, origin, colorR, colorG, colorB, speedBase,
         for i = 1,#listEnemies do
           enemyX, enemyY = listEnemies[i].getPosition();
           if ((enemyX <= self.x and (enemyX + listEnemies[i].width) >= self.x) and (enemyY <= self.y and (enemyY + listEnemies[i].height) >= self.y)) then
-            listEnemies[i]:Damage(1);
+            listEnemies[i]:damage(1);
             return true
           end
         end
@@ -205,7 +205,7 @@ end
 
 -----------------------------------------------------------------------
 
-function newEnemy(init_y, init_health)
+function newEnemy(init_y, init_health, id)
   local y = init_y
   local speed = math.random(20,20);
   local x = math.random(1,love.graphics.getWidth() - 100)
@@ -214,6 +214,7 @@ function newEnemy(init_y, init_health)
   local bulletPos = 0
   local timeLeftToTrySpawnBullet = 3;
   local health = init_health
+  local enemyId = id
   
   local img = love.graphics.newImage("resources/enemy.png")
   return {
@@ -236,8 +237,9 @@ function newEnemy(init_y, init_health)
         local _, height = love.graphics.getDimensions( )
         x = x+(speed*dt*dir*10)
         if health < 0 then
+          mqtt_client:publish("deadEnemy", enemyId)
           y = init_y
-          x = math.random(1,love.graphics.getWidth() - 100)
+          x = love.graphics.getWidth() - 100
           health = init_health;
           --speed = math.random(20,20);
         end
@@ -287,7 +289,7 @@ function newEnemy(init_y, init_health)
       return x, y
     end,
     
-    Damage = function(self, amount)
+    damage = function(self, amount)
       health = health - 1;
       if(health <= 0) then
         y = 1000
@@ -305,7 +307,7 @@ function love.load()
   
   mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
   mqtt_client:connect("GM" .. os.time())
-  mqtt_client:subscribe({"apertou-tecla","deadPlayer"})
+  mqtt_client:subscribe({"apertou-tecla","deadPlayer","deadEnemy"})
   
 	gameover = nil
 	gravity = 500
@@ -317,7 +319,7 @@ function love.load()
   listEnemies = {}
   
   for i = 1, 5 do
-		listEnemies[i] = newEnemy(i * 80, 3)
+		listEnemies[i] = newEnemy(i * 80, 3, i)
 	end
   
   player1 = newPilot()
@@ -407,7 +409,7 @@ function mqttcb(topic, message)
   end
   
   if topic == 'deadEnemy' then
-    print(message)
+    listEnemies[message]:damage()
   end
   
   if message == 'newPlayer' then
