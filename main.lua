@@ -159,7 +159,7 @@ function newShooter(pilot)
       x, y = pilot.getPosition()
       
       timeLeftToTrySpawnBullet = timeLeftToTrySpawnBullet - dt;
-      if(self:isActive() and timeLeftToTrySpawnBullet <= 0) then
+      if(timeLeftToTrySpawnBullet <= 0) then
         timeLeftToTrySpawnBullet = 0.5;
         self:spawnBullet();
       end
@@ -198,14 +198,7 @@ function newShooter(pilot)
   
   getPosition = function()
     return x, y
-  end,
-  
-  isActive = function(self)
-      if(os.clock() >= self.sleep) then
-        return true
-      end
-      return false
-    end
+  end
 	}
 end
 
@@ -228,7 +221,6 @@ function newEnemy(init_y, init_health)
   spawnBullet = function (self)
     bullets[bulletPos] = newBullet(math.pi/4, x, y, self, 0, 1, 0, 200, "player")
     bulletPos = bulletPos + 1;
-    wait(1/1000, self)
   end,
   
     update = function (self, dt)
@@ -289,13 +281,6 @@ function newEnemy(init_y, init_health)
     end,
     
     sleep = 0,
-    
-    isActive = function(self)
-      if(os.clock() >= self.sleep) then
-        return true
-      end
-      return false
-    end,
     
     getPosition = function()
       return x, y
@@ -365,9 +350,7 @@ function love.update(dt)
     
     --Atualiza inimigos
     for i = 1,#listEnemies do
-      if(listEnemies[i]:isActive()) then
-        listEnemies[i]:update(dt)      
-      end
+      listEnemies[i]:update(dt)      
     end
   end
 end
