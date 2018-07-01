@@ -326,7 +326,7 @@ end
 -----------------------------------------------------------------------
 
 function love.keypressed(key)
-  if gameover ~= nil then
+  if gameover ~= nil or victory ~= nil then
     if key == 'space' or key == ' ' then
         love.event.quit("restart")
     end
@@ -354,7 +354,7 @@ function love.update(dt)
   end
   
   if (kills == 5) then
-    gameover = true;
+    victory = true;
   end
 end
 
@@ -365,6 +365,10 @@ function love.draw()
 	local sy = love.graphics.getHeight() / background:getHeight()
 	if gameover == nil then
 		love.graphics.draw(background, 0, 0, 0, sx, sy)
+    
+    if victory ~= nil then
+      drawResultScreen("VICTORY")
+    end
     
     if init == false then
       love.graphics.setColor(0,0,0)
@@ -382,13 +386,18 @@ function love.draw()
 		end
     
   else
+    drawResultScreen("GAME OVER")
+	end
+end
+
+-----------------------------------------------------------------------
+function drawResultScreen(text)
     love.graphics.setFont(gameovertextfont)
     love.graphics.draw(background, 0, 0, 0, sx, sy)
     love.graphics.setColor(0,0,0)
-		love.graphics.print("GAME OVER", love.graphics.getWidth()/6, love.graphics.getHeight()/4, 0, 5, 5)
+		love.graphics.print(text, love.graphics.getWidth()/6, love.graphics.getHeight()/4, 0, 5, 5)
     love.graphics.print("Press SPACE to start a new game", love.graphics.getWidth()/4, love.graphics.getHeight()/1.2, 0, 1, 1)
     love.graphics.setColor(255,255,255)
-	end
 end
 
 -----------------------------------------------------------------------
