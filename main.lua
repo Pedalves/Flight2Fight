@@ -14,7 +14,7 @@ local controle_right2 = false
 local controle_left2 = false
 
 local players = 0
-
+local kills = 0
 -----------------------------------------------------------------------
 
 function newPilot()
@@ -287,6 +287,7 @@ function newEnemy(init_y, init_health, id)
       if(health <= 0) then
         y = 1000
         mqtt_client:publish("deadEnemy", enemyId)
+        kills = kills + 1;
         health = 10
       end
     end
@@ -351,6 +352,10 @@ function love.update(dt)
       listEnemies[i]:update(dt)      
     end
   end
+  
+  if (kills == 5) then
+    gameover = true;
+  end
 end
 
 -----------------------------------------------------------------------
@@ -404,7 +409,7 @@ function mqttcb(topic, message)
   end
   
   if topic == 'deadEnemy' then
-    listEnemies[tonumber(message)]:damage()
+    listEnemies[tonumber(message)]:damage(3)
   end
   
   if message == 'newPlayer' then
