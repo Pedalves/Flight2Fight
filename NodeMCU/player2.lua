@@ -1,6 +1,6 @@
 local meuid = "player2" --id do player no mqtt
 local m = mqtt.Client("clientid " .. meuid, 120) --configura mqtt
--- abx
+
 function publica(c)
   c:publish("apertou-tecla", "l2",0,0, 
             function(client) print("mandou!") end)
