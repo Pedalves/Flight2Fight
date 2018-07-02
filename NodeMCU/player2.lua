@@ -1,13 +1,11 @@
 local meuid = "player2" --id do player no mqtt
 local m = mqtt.Client("clientid " .. meuid, 120) --configura mqtt
-
---Publica no mqtt que botão da esquerda foi pressionado
+-- abx
 function publica(c)
   c:publish("apertou-tecla", "l2",0,0, 
             function(client) print("mandou!") end)
 end
 
---Publica no mqtt que botão da direita foi pressionado
 function publica2(c)
   c:publish("apertou-tecla", "r2",0,0, 
             function(client) print("mandou!") end)
